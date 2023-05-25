@@ -11,9 +11,6 @@
 	</PropertyGroup>
 	
 <ItemGroup>
-	<Content Include="Tuntiraportti.csv">
-		<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-	</Content>
 	<Content Include="Tuntiraportti.xlsx">
 		<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	</Content>
