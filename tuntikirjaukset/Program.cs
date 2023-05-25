@@ -41,6 +41,8 @@ var groupedValues = tuntikirjausData
 var csvHeaderRow = "ToimintaYksikkö;ToimintaYksikköName;Toiminto;ToimintoName;Project;ProjectName;AllocatedHours;AllocatedDays" + "\n";
 File.WriteAllText(OUTPUT_FILEPATH, csvHeaderRow + string.Join("\n", groupedValues), Encoding.Latin1);
 
+// End of program 
+
 public record OutputData(string ToimintaYksikkö, string ToimintaYksikköName, string Toiminto, string ToimintoName, string Project, string ProjectName, double AllocatedHours, double AllocatedDays) {
     public override string ToString() {
         return $"{ToimintaYksikkö};{ToimintaYksikköName};{Toiminto};{ToimintoName};{Project};{ProjectName};{AllocatedHours};{AllocatedDays}";
@@ -97,7 +99,7 @@ public static class IExcelDataReaderExtensions {
             return reader.GetString(column);
         }
         catch (Exception e) {
-            return "";
+            return ""; // an empty cell throws an exception which sucks so we'll just catch it and give back an empty string.
         }
     }
 }
