@@ -1,4 +1,5 @@
 Development:    
+Export Tuntiraportti.xlsx from eKieku and put it in the Project folder where program.cs is   
 Press start in Visual Studio 2022    
 
 Publishing:    
