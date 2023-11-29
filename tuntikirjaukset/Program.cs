@@ -5,23 +5,29 @@ using System.Text;
 
 const string INPUT_FILENAME = "Tuntiraportti.xlsx";
 var INPUT_FILEPATH = AppDomain.CurrentDomain.BaseDirectory + "\\" + INPUT_FILENAME;
+
 const string OUTPUT_FILENAME = "Tuntiraportti_projekteittain.csv";
 var OUTPUT_FILEPATH = AppDomain.CurrentDomain.BaseDirectory + "\\" + OUTPUT_FILENAME;
+
 const double WORKDAY_LENGTH = 7.25;
+const double WORKMONTH_LENGTH = 21;
 
 List<TuntikirjausData> tuntikirjausData = new();
 
-using (var stream = File.Open(INPUT_FILEPATH, FileMode.Open, FileAccess.Read)) {
+using (var stream = File.Open(INPUT_FILEPATH, FileMode.Open, FileAccess.Read))
+{
     Encoding.RegisterProvider(CodePagesEncodingProvider.Instance); // needed for .net core compatability
     using var reader = ExcelReaderFactory.CreateReader(stream);
     reader.Read(); // skip header row
-    while (reader.Read()) {
+    while (reader.Read())
+    {
         tuntikirjausData.Add(TuntikirjausData.FromReader(reader));
     }
 }
 
 var groupedValues = tuntikirjausData
-    .GroupBy(e => new {
+    .GroupBy(e => new
+    {
         e.Toimintayksikkö,
         e.Project,
         e.Toiminto,
@@ -34,18 +40,21 @@ var groupedValues = tuntikirjausData
         e.Key.Project,
         e.First().ProjectName, // For some reason, the same project can have multiple names (basically just typoes of what it's supposed to be)
         double.Round(e.ToList().Sum(e => e.AllocatedHours.TotalHours), 2),
-        double.Round(e.ToList().Sum(e => e.AllocatedHours.TotalHours) / WORKDAY_LENGTH, 2))) // too lazy to not sum it twice
+        double.Round(e.ToList().Sum(e => e.AllocatedHours.TotalHours) / WORKDAY_LENGTH, 2), // too lazy to not sum it twice
+        double.Round(e.ToList().Sum(e => e.AllocatedHours.TotalHours) / WORKDAY_LENGTH / WORKMONTH_LENGTH, 2))) // too lazy to not sum it thrice
     .OrderBy(e => e.Project)
     .ToList();
 
-var csvHeaderRow = "ToimintaYksikkö;ToimintaYksikköName;Toiminto;ToimintoName;Project;ProjectName;AllocatedHours;AllocatedDays" + "\n";
+var csvHeaderRow = "ToimintaYksikkö;ToimintaYksikköName;Toiminto;ToimintoName;Project;ProjectName;AllocatedHours;AllocatedDays;AllocatedMonths" + "\n";
 File.WriteAllText(OUTPUT_FILEPATH, csvHeaderRow + string.Join("\n", groupedValues), Encoding.Latin1);
 
 // End of program 
 
-public record OutputData(string ToimintaYksikkö, string ToimintaYksikköName, string Toiminto, string ToimintoName, string Project, string ProjectName, double AllocatedHours, double AllocatedDays) {
-    public override string ToString() {
-        return $"{ToimintaYksikkö};{ToimintaYksikköName};{Toiminto};{ToimintoName};{Project};{ProjectName};{AllocatedHours};{AllocatedDays}";
+public record OutputData(string ToimintaYksikkö, string ToimintaYksikköName, string Toiminto, string ToimintoName, string Project, string ProjectName, double AllocatedHours, double AllocatedDays, double AllocatedMonths)
+{
+    public override string ToString()
+    {
+        return $"{ToimintaYksikkö};{ToimintaYksikköName};{Toiminto};{ToimintoName};{Project};{ProjectName};{AllocatedHours};{AllocatedDays};{AllocatedMonths}";
     }
 }
 
@@ -67,8 +76,10 @@ public record TuntikirjausData(
     string Seuko2,  // always empty 
     string Seuko2Name, // always empty
     string Explanation, // always empty
-    string State) {
-    public static TuntikirjausData FromReader(in IExcelDataReader reader) {
+    string State)
+{
+    public static TuntikirjausData FromReader(in IExcelDataReader reader)
+    {
         var dailyValues = new TuntikirjausData(
             ContractNumber: reader.FromCell(0),
             Title: reader.FromCell(1),
@@ -93,12 +104,16 @@ public record TuntikirjausData(
     }
 }
 
-public static class IExcelDataReaderExtensions {
-    public static string FromCell(this IExcelDataReader reader, in int column) {
-        try {
+public static class IExcelDataReaderExtensions
+{
+    public static string FromCell(this IExcelDataReader reader, in int column)
+    {
+        try
+        {
             return reader.GetString(column);
         }
-        catch (Exception e) {
+        catch (Exception e)
+        {
             return ""; // an empty cell throws an exception which sucks so we'll just catch it and give back an empty string.
         }
     }
